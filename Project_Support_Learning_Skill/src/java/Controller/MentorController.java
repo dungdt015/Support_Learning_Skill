@@ -21,9 +21,7 @@ public class MentorController extends HttpServlet {
     
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
-       try{
-           if(!Author)
-       }
+       
     } 
 
     @Override

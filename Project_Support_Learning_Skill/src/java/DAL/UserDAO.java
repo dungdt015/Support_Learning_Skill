@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package DAO;
+package DAL;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,6 +12,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import model.Mentee;
+import model.Mentor;
 import model.User;
 
 /**
@@ -97,6 +99,60 @@ public class UserDAO {
         return null;
     }
 
+    public static Object getRole(int id, String role) throws SQLException {
+        Connection dbo = DatabaseUtil.getConn();
+        try {
+            if (role.equalsIgnoreCase("mentee")) {
+
+                PreparedStatement ps = dbo.prepareStatement("SELECT * FROM [Mentee] WHERE [UserID] = ?");
+                ps.setInt(1, id);
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) {
+                    return new Mentee(rs.getString("MenteeStatus"), id);
+                }
+            } else if (role.equalsIgnoreCase("mentor")) {
+                PreparedStatement ps = dbo.prepareStatement("SELECT * FROM [Mentor] WHERE [UserID] = ?");
+                ps.setInt(1, id);
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) {
+                    ps = dbo.prepareStatement("SELECT * FROM [User] WHERE [UserID] = ?");
+                    ps.setInt(1, id);
+                    ResultSet rs2 = ps.executeQuery();
+                    rs2.next();
+                    return new Mentor(rs.getString("MentorStatus"), rs.getString("Achivement"), rs.getString("Description"), id, rs.getInt("CvID"), rs2.getString("fullname"), rs2.getString("Avatar"));
+
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static boolean isRegister(String email, String username) throws SQLException {
+        Connection dbo = DatabaseUtil.getConn();
+        try {
+            PreparedStatement ps = dbo.prepareStatement("SELECT * FROM [User] WHERE [email] = ? AND [username] = ?");
+            ps.setString(1, email);
+            ps.setString(2, username);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                rs.close();
+                ps.close();
+                dbo.close();
+                return true;
+            }
+            rs.close();
+            ps.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+
+            dbo.close();
+        }
+        return false;
+    }
+
     public static User register(String username, String password, String email, String phone, String address, String role, String gender, String fullname, String dob) throws SQLException {
         Connection dbo = DatabaseUtil.getConn();
         try {
@@ -146,4 +202,5 @@ public class UserDAO {
         }
         return null;
     }
+
 }
